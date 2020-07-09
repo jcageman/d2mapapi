@@ -21,7 +21,7 @@ Starts the webserver
 
 ## API
 
-POST localhost:8080/sessions/ -- starts a new session (difficulty 0,1 or 2 (2 = hell)
+POST localhost:8080/sessions/ -- starts a new session (difficulty 0,1 or 2 (2 = hell))
 ```
 {
     "difficulty" : 2, 
