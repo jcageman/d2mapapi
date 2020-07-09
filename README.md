@@ -19,7 +19,8 @@ d2mapapi.exe "C:\Diablo II1.13c"
 
 Starts the webserver
 
-Endpoints:
+## API
+
 POST localhost:8080/sessions/ -- starts a new session
 ```
 {
