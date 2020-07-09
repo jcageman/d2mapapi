@@ -21,10 +21,10 @@ Starts the webserver
 
 ## API
 
-POST localhost:8080/sessions/ -- starts a new session
+POST localhost:8080/sessions/ -- starts a new session (difficulty 0,1 or 2 (2 = hell)
 ```
 {
-    "difficulty" : 2,
+    "difficulty" : 2, 
     "mapid" : 405387119
 }
 ```
