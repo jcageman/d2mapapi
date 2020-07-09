@@ -1,5 +1,7 @@
 # d2mapapi
-d2 map rest API to retrieve the map layout per area given a map seed
+d2 map rest API to retrieve the map layout per area given a map seed for diablo 1.13C
+
+Note: A diablo 2 1.13C installation is required!
 
 ## Installation
 
