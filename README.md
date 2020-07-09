@@ -5,7 +5,7 @@ Note: A diablo 2 1.13C installation is required!
 
 ## Installation
 
-Download vcpkg https://github.com/microsoft/vcpkg
+Download & install vcpkg https://github.com/microsoft/vcpkg
 
 ```
 vcpkg install boost-uuid
