@@ -57,7 +57,7 @@ restinio::request_handling_status_t MapRequestHandler::post_session(const restin
 		std::string uuid = boost::uuids::to_string( m_session_id_generator());
 		m_sessions[uuid] = std::make_unique<Session>( newSession.m_mapId, newSession.m_difficulty );
 
-		const auto createdSession = SessionDto( uuid, newSession.m_difficulty, newSession.m_mapId );
+		const auto createdSession = SessionDto( uuid, newSession.m_mapId, newSession.m_difficulty );
 		resp.set_body( json_dto::to_json( createdSession ) );
 		resp.header().status_line( restinio::status_created() );
 	}
