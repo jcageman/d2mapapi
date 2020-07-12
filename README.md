@@ -1,7 +1,7 @@
 # d2mapapi
-Diablo II map rest API to retrieve the map layout per area given a map seed for diablo II 1.13C
+Diablo II map rest API to retrieve the map layout per area given a map seed
 
-Note: A diablo 2 1.13C installation is required!
+A diablo 2 1.13C installation is required, but this API should work for all versions of diablo 2. Do note that for 1.09 and lower, higher difficulties do not generate larger maps, hence when interfacing with the API, always use difficulty = 0 (normal).
 
 ## Installation
 
