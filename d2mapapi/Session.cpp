@@ -53,3 +53,13 @@ CCollisionMap* Session::GetMap(unsigned int areaid)
 
 	return m_maps[areaid].get();
 }
+
+unsigned Session::GetMapId() const
+{
+	return m_mapid;
+}
+
+unsigned Session::GetDifficulty() const
+{
+	return m_difficulty;
+}

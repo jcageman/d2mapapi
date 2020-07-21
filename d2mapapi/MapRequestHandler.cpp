@@ -6,8 +6,6 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <json_dto/pub.hpp>
 #include "MapDto.h"
-#include "SessionDto.h"
-#include "NewSessionDto.h"
 
 template < typename RESP >
 static RESP
@@ -21,64 +19,33 @@ init_resp( RESP resp )
 	return resp;
 }
 
-static boost::uuids::random_generator  m_session_id_generator;
-static std::map<std::string, std::unique_ptr<Session>> m_sessions;
+static std::unique_ptr<Session> m_session;
 static std::mutex m;
 
-restinio::request_handling_status_t MapRequestHandler::get_area(const restinio::request_handle_t& req, const restinio::router::route_params_t& params)
-{
-	std::scoped_lock lock( m );
-	auto resp = init_resp( req->create_response() );
-	const auto session_id = restinio::cast_to<std::string>( params["session_id"] );
-	const auto area_id = restinio::cast_to<unsigned int>( params["area_id"] );
-	const auto session = m_sessions.find( session_id );
-	if (session != m_sessions.end())
-	{
-		const auto map = session->second->GetMap( area_id );
-
-		resp.set_body( json_dto::to_json( map::MapToDto(*map) ) );
-	}
-	else
-	{
-		resp.header().status_line( restinio::status_not_found() );
-	}
-
-	return resp.done();
-}
-
-restinio::request_handling_status_t MapRequestHandler::post_session(const restinio::request_handle_t& req, const restinio::router::route_params_t& params)
+restinio::request_handling_status_t MapRequestHandler::get_map(const restinio::request_handle_t& req, const restinio::router::route_params_t& params) const
 {
 	std::scoped_lock lock( m );
 	auto resp = init_resp( req->create_response() );
 
 	try
 	{
-		auto newSession = json_dto::from_json< NewSessionDto >( req->body() );
-		std::string uuid = boost::uuids::to_string( m_session_id_generator());
-		m_sessions[uuid] = std::make_unique<Session>( newSession.m_mapId, newSession.m_difficulty );
+		const auto queryparameters = restinio::parse_query( req->header().query() );
+		const auto mapId = restinio::cast_to<unsigned int>( queryparameters[ "mapid" ] );
+		const auto difficulty = restinio::cast_to<unsigned int>( queryparameters[ "difficulty" ] );
+		const auto areaId = restinio::cast_to<unsigned int>( queryparameters[ "areaid" ] );
+		if(!m_session || m_session->GetDifficulty() != difficulty || m_session->GetMapId() != mapId )
+		{
+			m_session.reset(); // first ensure we unload data
+			m_session = std::make_unique<Session>( mapId, difficulty );
+		}
 
-		const auto createdSession = SessionDto( uuid, newSession.m_mapId, newSession.m_difficulty );
-		resp.set_body( json_dto::to_json( createdSession ) );
-		resp.header().status_line( restinio::status_created() );
+		CCollisionMap* const map = m_session->GetMap( areaId );
+
+		resp.set_body( json_dto::to_json( map::MapToDto( *map ) ) );
 	}
 	catch (const std::exception&)
 	{
 		resp.header().status_line( restinio::status_bad_request() );
-	}
-
-	return resp.done();
-}
-
-restinio::request_handling_status_t MapRequestHandler::delete_session(const restinio::request_handle_t& req, const restinio::router::route_params_t& params )
-{
-	std::scoped_lock lock( m );
-	auto resp = init_resp( req->create_response() );
-	resp.header().status_line( restinio::status_no_content() );
-	const auto session_id = restinio::cast_to<std::string>( params["session_id"] );
-	const auto session = m_sessions.find( session_id );
-	if (session != m_sessions.end())
-	{
-		m_sessions.erase( session );
 	}
 
 	return resp.done();

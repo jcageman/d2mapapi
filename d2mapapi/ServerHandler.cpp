@@ -15,12 +15,7 @@ std::unique_ptr<router_t > map::create_server_handler()
 	};
 
 	// Handlers for '/sessions/' path.
-	router->http_post("/sessions/", callHandler( &MapRequestHandler::post_session ) );
-
-	router->http_delete("/sessions/:session_id", callHandler( &MapRequestHandler::delete_session ) );
-
-	// Handler for '/sessions/:sessionid/areas/:areaid' path.
-	router->http_get("/sessions/:session_id/areas/:area_id", callHandler( &MapRequestHandler::get_area ) );
+	router->http_get("/maprequests", callHandler( &MapRequestHandler::get_map ) );
 
 	router->non_matched_request_handler(
 		[]( auto req ) {
