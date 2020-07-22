@@ -8,6 +8,7 @@ A diablo 2 1.13C installation is required, but this API should work for all vers
 Download & install vcpkg https://github.com/microsoft/vcpkg
 
 ```
+vcpkg install boost-uuid
 vcpkg install restinio
 vcpkg install json-dto
 ```
@@ -20,7 +21,13 @@ Starts the webserver
 
 ## API
 
-The following requests obtains the map information for a given mapId, difficulty (0,1 or 2) and areaId (e.g. 101 is Durance Of Hate Level 2)
+POST localhost:8080/sessions/ -- starts a new session (difficulty 0,1 or 2 (2 = hell))
 ```
-GET localhost:8080/maprequests?mapid=1530537122&difficulty=0&areaid=101
+{
+    "difficulty" : 2, 
+    "mapid" : 405387119
+}
 ```
+DELETE localhost:8080/sessions/{{sessionId}} -- cleans up the session (every new game is a session)
+
+GET localhost:8080/sessions/{{sessionId}}/areas/35  -- retrieves the map information for catacombs 2 (area 35)
