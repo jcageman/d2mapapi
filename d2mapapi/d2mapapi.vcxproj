@@ -18,7 +18,9 @@
     <ClCompile Include="Offset.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ServerHandler.cpp" />
+    <ClCompile Include="NewSessionDto.cpp" />
     <ClCompile Include="Session.cpp" />
+    <ClCompile Include="SessionDto.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CollisionMap.h" />
@@ -29,7 +31,9 @@
     <ClInclude Include="MapRequestHandler.h" />
     <ClInclude Include="Offset.h" />
     <ClInclude Include="ServerHandler.h" />
+    <ClInclude Include="NewSessionDto.h" />
     <ClInclude Include="Session.h" />
+    <ClInclude Include="SessionDto.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{60634613-E340-4E8B-B001-1B5F0CF67F0E}</ProjectGuid>

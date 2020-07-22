@@ -10,8 +10,6 @@ public:
 	~Session();
 
 	CCollisionMap* GetMap(unsigned int areaid);
-	unsigned int GetMapId() const;
-	unsigned int GetDifficulty() const;
 private:
 	std::map<int, std::unique_ptr<CCollisionMap>> m_maps;
 	unsigned int m_mapid;
