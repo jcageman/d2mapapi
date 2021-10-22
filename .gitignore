@@ -39,4 +39,5 @@
 .vs
 Debug
 Release
+vcpkg_installed
 *.user

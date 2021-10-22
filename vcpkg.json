@@ -1,0 +1,9 @@
+{
+  "name": "d2mapapi",
+  "version-string": "1.0.0",
+  "dependencies": [
+      "boost-uuid",
+      "restinio",
+      "json-dto"
+  ]
+}
