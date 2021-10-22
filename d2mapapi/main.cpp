@@ -39,9 +39,9 @@ int main( int argc, const char* argv[] ) {
 			restinio::on_this_thread< traits_t >()
 			.address( address )
 			.request_handler( map::create_server_handler() )
-			.read_next_http_message_timelimit( 20s )
-			.write_http_response_timelimit( 10s )
-			.handle_request_timeout( 10s ) );
+			.read_next_http_message_timelimit( 10s )
+			.write_http_response_timelimit( 1s )
+			.handle_request_timeout( 1s ) );
 	}
 	catch (const std::exception& ex)
 	{
