@@ -5,16 +5,35 @@ A diablo 2 1.13C installation is required, but this API should work for all vers
 
 ## Installation
 
-Download & install vcpkg https://github.com/microsoft/vcpkg (don't forget to add to path)
+First install [vcpkg](https://github.com/microsoft/vcpkg)
 
-Dependencies should now be installed and included for you when building from source.
+### Windows
+```
+git clone https://github.com/microsoft/vcpkg
+.\vcpkg\bootstrap-vcpkg.bat
+```
 
-If required, manually install and include these dependences:
+### Unix
+```
+git clone https://github.com/microsoft/vcpkg
+.\vcpkg\bootstrap-vcpkg.sh
+```
+
+The binary will be located here `.\vcpkg\vcpkg`, make sure to include this in your path and restart your shell. Once done setup a vcpkg integration by running:
+
+```
+vcpkg integrate install
+```
+
+If you are using Visual Studio to build this project, vcpkg dependencies will be automatically installed and included to this repository. If not, you will need to manually fetch and include the following packages:
+
 ```
 vcpkg install boost-uuid
 vcpkg install restinio
 vcpkg install json-dto
 ```
+
+You should now be able to build d2mapapi.sln
 
 ## Usage
 
@@ -46,7 +65,7 @@ EXPOSE 8080
 CMD ["wine", "d2mapapi.exe", "/app/game", "0.0.0.0"]
 ```
 
-[Download the latest release](https://github.com/jcageman/d2mapapi/releases)
+[Download the latest release](https://github.com/rmilejcz/d2mapapi/releases)
 
 Place the d2mapapi folder the dockerfile in the same folder, and navigate their via command line then run `docker build -t d2mapapi .`
 
