@@ -40,5 +40,6 @@
 Debug
 Release
 vcpkg
+.vscode
 vcpkg_installed
 *.user
