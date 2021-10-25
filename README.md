@@ -19,7 +19,7 @@ git clone https://github.com/microsoft/vcpkg
 .\vcpkg\bootstrap-vcpkg.sh
 ```
 
-The binary will be located here `.\vcpkg\vcpkg`, make sure to include this in your path and restart your shell. Once done setup a vcpkg integration by running:
+The binary will be located here `.\vcpkg\vcpkg`, make sure to include the absolute path to this in your system path environment variable and restart your shell. Once done setup a vcpkg integration by running:
 
 ```
 vcpkg integrate install
