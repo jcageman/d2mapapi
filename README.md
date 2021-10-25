@@ -37,15 +37,20 @@ You should now be able to build d2mapapi.sln
 
 ## Usage
 
-d2mapapi.exe DIABLO2_PATH \[ADDRESS_OVERRIDE\]
+d2mapapi.exe DIABLO2_PATH \[OPTIONAL_ARGUMENTS\]
 
 Examples:
 ```
-d2mapapi.exe "C:\Diablo II1.13c"
-d2mapapi.exe "C:\Diablo II1.13c" "0.0.0.0"
+d2mapapi.exe {diablo2dir} [optionalArguments]
 ```
 
-Starts the webserver
+### Optional Arguments
+    * -i or --ip
+        specify an IP address to use instead of localhost. ex: `-i 192.168.0.1` OR `--ip=192.168.0.1`";
+    * -p or --port
+        specify n port address to use instead of the default 8080. ex: `-p 8080` OR `--port=8080`";
+    * -h or --help
+        display usage information
 
 ## Running in Docker
 
@@ -62,7 +67,7 @@ WORKDIR /app
 # d2mapapi should be in the same folder as your dockerfile
 COPY ./d2mapapi .
 EXPOSE 8080
-CMD ["wine", "d2mapapi.exe", "/app/game", "0.0.0.0"]
+CMD ["wine", "d2mapapi.exe", "/app/game", "--ip=0.0.0.0"]
 ```
 
 [Download the latest release](https://github.com/rmilejcz/d2mapapi/releases)
