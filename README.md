@@ -37,11 +37,9 @@ You should now be able to build d2mapapi.sln
 
 ## Usage
 
-d2mapapi.exe DIABLO2_PATH \[OPTIONAL_ARGUMENTS\]
-
-Examples:
+Syntax:
 ```
-d2mapapi.exe {diablo2dir} [optionalArguments]
+d2mapapi.exe {pathToDiablo2} [optionalArguments]
 ```
 
 ### Optional Arguments
