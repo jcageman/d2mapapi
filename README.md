@@ -42,13 +42,20 @@ Syntax:
 d2mapapi.exe {pathToDiablo2} [optionalArguments]
 ```
 
-### Optional Arguments
+#### Optional Arguments
     * -i or --ip
         specify an IP address to use instead of localhost. ex: `-i 192.168.0.1` OR `--ip=192.168.0.1`";
     * -p or --port
         specify n port address to use instead of the default 8080. ex: `-p 8080` OR `--port=8080`";
     * -h or --help
         display usage information
+
+#### Examples
+```
+d2mapapi.exe "C:\Diablo II1.13c"
+d2mapapi.exe "C:\Diablo II1.13c" --ip=0.0.0.0 --port=88
+d2mapapi.exe "C:\Diablo II1.13c" --port=80
+```
 
 ## Running in Docker
 
