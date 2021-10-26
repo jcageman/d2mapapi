@@ -75,7 +75,7 @@ EXPOSE 8080
 CMD ["wine", "d2mapapi.exe", "/app/game", "--ip=0.0.0.0"]
 ```
 
-[Download the latest release](https://github.com/rmilejcz/d2mapapi/releases)
+[Download the latest release](https://github.com/jcageman/d2mapapi/releases)
 
 Place the d2mapapi folder the dockerfile in the same folder, and navigate their via command line then run `docker build -t d2mapapi .`
 
