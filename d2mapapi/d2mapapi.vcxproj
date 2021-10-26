@@ -21,12 +21,14 @@
     <ClCompile Include="NewSessionDto.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SessionDto.cpp" />
+    <ClCompile Include="Helpers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CollisionMap.h" />
     <ClInclude Include="D2Map.h" />
     <ClInclude Include="D2Ptrs.h" />
     <ClInclude Include="D2Structs.h" />
+    <ClInclude Include="Helpers.h" />
     <ClInclude Include="MapDto.h" />
     <ClInclude Include="MapRequestHandler.h" />
     <ClInclude Include="Offset.h" />
