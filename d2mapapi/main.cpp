@@ -81,8 +81,8 @@ int main( int argc, const char* argv[] ) {
 			.port( port )
 			.request_handler( map::create_server_handler() )
 			.read_next_http_message_timelimit( 10s )
-			.write_http_response_timelimit( 1s )
-			.handle_request_timeout( 1s ) );
+			.write_http_response_timelimit( 5s )
+			.handle_request_timeout( 5s ) );
 	}
 	catch (const std::exception& ex)
 	{
