@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <WarningLevel>2</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <UserSecretsId>46077897-d1da-4aff-9d89-04249b76d0be</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\D2Map.Core\D2Map.Core.csproj" />
+    <ProjectReference Include="..\D2Map.DllWrapper\D2Map.DllWrapper.vcxproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="D2Map.DllWrapper.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+
+</Project>
