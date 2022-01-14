@@ -7,7 +7,7 @@ Note: or 1.09 and lower, higher difficulties do not generate larger maps, hence 
 
 ## Installation
 
-This project assumes you have VS2019 installed with .NET Core 3.1 and C++ workloads.
+This project assumes you have VS2022 installed with .NET 6.0 and C++ workloads.
 
 ## Usage Examples
 ```
@@ -31,7 +31,7 @@ WORKDIR /app
 # d2mapapi should be in the same folder as your dockerfile
 COPY ./d2mapapi .
 EXPOSE 8080
-CMD ["wine", "D2Map.Api.exe", "Diablo2Directory=/app/game", "--urls=https://0.0.0.0:5001"]
+CMD ["wine", "D2Map.Api.exe", "Diablo2Directory=/app/game", "--urls=https://0.0.0.0:8080"]
 ```
 
 [Download the latest release](https://github.com/jcageman/d2mapapi/releases)
