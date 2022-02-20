@@ -11,10 +11,12 @@ This project assumes you have VS2022 installed with .NET 6.0 and C++ workloads.
 
 ## Usage Examples
 ```
-dotnet run D2Map.Api.exe Diablo2Directory="C:\Diablo II1.13c"
-dotnet run D2Map.Api.exe --urls https://localhost:8080 Diablo2Directory="C:\Diablo II1.13c"
-dotnet run D2Map.Api.exe --urls https://0.0.0.0:8080 Diablo2Directory="C:\Diablo II1.13c"
+./D2Map.Api.exe Diablo2Directory="C:\Diablo II1.13c"
+./D2Map.Api.exe --urls https://localhost:8080 Diablo2Directory="C:\Diablo II1.13c"
+./D2Map.Api.exe --urls https://0.0.0.0:8080 Diablo2Directory="C:\Diablo II1.13c"
 ```
+
+Note: to run from source use dotnet run or simply start the project from visual studio.
 
 ## Running in Docker
 
