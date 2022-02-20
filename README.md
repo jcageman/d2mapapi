@@ -3,7 +3,7 @@ Diablo II map rest API to retrieve the map layout per area given a map id.
 
 A diablo 2 1.13C installation is required, but the result returned by this API should work for all versions of diablo 2, since the map generation has stayed the same across all verisons.
 
-Note: or 1.09 and lower, higher difficulties do not generate larger maps, hence when interfacing with the API, always use difficulty normal.
+Note: for 1.09 and lower, higher difficulties do not generate larger maps, hence when interfacing with the API, always use difficulty normal.
 
 ## Installation
 
