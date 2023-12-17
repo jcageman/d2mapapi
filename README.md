@@ -7,7 +7,7 @@ Note: for 1.09 and lower, higher difficulties do not generate larger maps, hence
 
 ## Installation
 
-This project assumes you have VS2022 installed with .NET 6.0 and C++ workloads.
+This project assumes you have VS2022 installed with .NET 8.0 and C++ workloads.
 
 ## Usage Examples
 ```
