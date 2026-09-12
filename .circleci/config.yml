@@ -1,8 +1,10 @@
 version: 2.1
 
-# The native wrapper (D2Map.DllWrapper) is a Win32 C++ project, so the build needs Visual Studio's
-# MSBuild with the C++ toolset. That rules out the Linux .NET SDK image D2NG uses; the Windows
-# executor ships Visual Studio 2022 Build Tools, and the .NET 10 SDK is installed on the fly.
+# The native wrapper (D2Map.DllWrapper) is a Win32 C++ project and needs Visual Studio's MSBuild with
+# the C++ toolset, which rules out the Linux .NET SDK image D2NG uses. The Windows executor ships
+# Visual Studio 2022 Build Tools (MSBuild 17), which is too old to load the .NET 10 SDK, so the two
+# halves are built with different engines: the C++ DLL with Visual Studio MSBuild, the managed
+# projects with the .NET 10 SDK's own MSBuild, skipping their reference to the vcxproj.
 orbs:
   win: circleci/windows@5.0
 
@@ -20,16 +22,21 @@ jobs:
             ./dotnet-install.ps1 -Channel 10.0 -InstallDir "$env:USERPROFILE\dotnet"
             & "$env:USERPROFILE\dotnet\dotnet.exe" --version
       - run:
-          name: Build solution (Release, x86)
+          name: Build native wrapper (Visual Studio MSBuild, Release, Win32)
           command: |
-            $env:DOTNET_ROOT = "$env:USERPROFILE\dotnet"
-            $env:PATH = "$env:DOTNET_ROOT;$env:PATH"
             $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
             $msbuild = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe" | Select-Object -First 1
             if (-not $msbuild) { throw "MSBuild not found" }
             Write-Host "Using $msbuild"
-            # The project files pin the toolset of the developer machine; the image has v143.
-            & $msbuild D2Map.sln -restore -p:Configuration=Release -p:Platform=x86 -p:PlatformToolset=v143 -m -v:minimal
+            # The project file pins the toolset of the developer machine; the image has v143.
+            & $msbuild D2Map.DllWrapper\D2Map.DllWrapper.vcxproj -p:Configuration=Release -p:Platform=Win32 -p:PlatformToolset=v143 -m -v:minimal
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - run:
+          name: Build managed projects (.NET 10 SDK, Release)
+          command: |
+            $env:DOTNET_ROOT = "$env:USERPROFILE\dotnet"
+            $env:PATH = "$env:DOTNET_ROOT;$env:PATH"
+            dotnet build D2Map.Api\D2Map.Api.csproj -c Release -p:SkipNativeReference=true
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - store_artifacts:
           path: D2Map.DllWrapper\Release\D2Map.DllWrapper.dll

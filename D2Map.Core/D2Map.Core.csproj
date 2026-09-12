@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -16,7 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\D2Map.DllWrapper\D2Map.DllWrapper.vcxproj" />
+    <!-- Builds the native wrapper along with the managed code. CI builds it separately with Visual Studio
+         MSBuild and sets SkipNativeReference so the .NET SDK build does not have to load a vcxproj. -->
+    <ProjectReference Include="..\D2Map.DllWrapper\D2Map.DllWrapper.vcxproj" Condition="'$(SkipNativeReference)' != 'true'" />
   </ItemGroup>
 
 </Project>
