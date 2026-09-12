@@ -1,7 +1,8 @@
-﻿using D2Map.Core.Models;
+using D2Map.Core.Models;
 using D2Map.Core.Wrapper;
 using System.Collections.Generic;
 using System.Linq;
+using static D2Map.Core.Wrapper.D2Offsets;
 
 namespace D2Map.Core.Helpers
 {
@@ -26,70 +27,81 @@ namespace D2Map.Core.Helpers
 
         public unsafe static CollisionMap BuildCollissionMap(Wrapper.Act* act, Area area)
         {
+            var o = Current;
             var collisionMap = new CollisionMap();
-            if (act->pActMisc->RealTombArea != 0)
+            ActMisc* pMisc = Ptr<ActMisc>(act, o.Act_pActMisc);
+            uint realTombArea = U32(pMisc, o.ActMisc_RealTombArea);
+            if (realTombArea != 0)
             {
-                collisionMap.TombArea = (Area)act->pActMisc->RealTombArea;
+                collisionMap.TombArea = (Area)realTombArea;
             }
 
-            Level* pLevel = MapDll.GetLevel(act->pActMisc, (uint)area);
+            Level* pLevel = MapDll.GetLevel(pMisc, (uint)area);
 
             if (pLevel != null)
             {
-                if (pLevel->pRoom2First == null)
+                if (Ptr<Room2>(pLevel, o.Level_pRoom2First) == null)
                 {
                     MapDll.InitLevel(pLevel);
                 }
 
-                if (pLevel->pRoom2First != null)
+                if (Ptr<Room2>(pLevel, o.Level_pRoom2First) != null)
                 {
-                    collisionMap.LevelOrigin = new Point(pLevel->dwPosX * 5, pLevel->dwPosY * 5);
-                    int width = (int)pLevel->dwSizeX * 5;
-                    int height = (int)pLevel->dwSizeY * 5;
+                    uint levelNo = U32(pLevel, o.Level_dwLevelNo);
+                    collisionMap.LevelOrigin = new Point(U32(pLevel, o.Level_dwPosX) * 5, U32(pLevel, o.Level_dwPosY) * 5);
+                    int width = (int)U32(pLevel, o.Level_dwSizeX) * 5;
+                    int height = (int)U32(pLevel, o.Level_dwSizeY) * 5;
                     collisionMap.Map = new List<List<int>>(height);
                     for (int i = 0; i < height; i++)
                     {
                         collisionMap.Map.Add(new List<int>(Enumerable.Repeat(-1, width)));
                     }
 
-                    for (Room2* pRoom2 = pLevel->pRoom2First; pRoom2 != null; pRoom2 = pRoom2->pRoom2Next)
+                    for (Room2* pRoom2 = Ptr<Room2>(pLevel, o.Level_pRoom2First); pRoom2 != null; pRoom2 = Ptr<Room2>(pRoom2, o.Room2_pRoom2Next))
                     {
                         bool bAdded = false;
+                        uint roomPosX = U32(pRoom2, o.Room2_dwPosX);
+                        uint roomPosY = U32(pRoom2, o.Room2_dwPosY);
 
-                        if (pRoom2->pRoom1 == null)
+                        if (Ptr<Room1>(pRoom2, o.Room2_pRoom1) == null)
                         {
                             bAdded = true;
-                            MapDll.AddRoomData(act, pLevel->dwLevelNo, pRoom2->dwPosX, pRoom2->dwPosY, null);
+                            MapDll.AddRoomData(act, levelNo, roomPosX, roomPosY, null);
                         }
 
                         // levels near
-                        for (uint i = 0; i < pRoom2->dwRoomsNear; i++)
+                        Room2** pRoomsNear = (Room2**)RawPtr(pRoom2, o.Room2_pRoom2Near);
+                        uint roomsNear = U32(pRoom2, o.Room2_dwRoomsNear);
+                        for (uint i = 0; i < roomsNear; i++)
                         {
-                            if (pLevel->dwLevelNo != pRoom2->pRoom2Near[i]->pLevel->dwLevelNo)
+                            Level* pNearLevel = Ptr<Level>(pRoomsNear[i], o.Room2_pLevel);
+                            uint nearLevelNo = U32(pNearLevel, o.Level_dwLevelNo);
+                            if (levelNo != nearLevelNo)
                             {
-                                var originX = pRoom2->pRoom2Near[i]->pLevel->dwPosX * 5;
-                                var originY = pRoom2->pRoom2Near[i]->pLevel->dwPosY * 5;
+                                var originX = U32(pNearLevel, o.Level_dwPosX) * 5;
+                                var originY = U32(pNearLevel, o.Level_dwPosY) * 5;
                                 var origin = new Point(originX, originY);
-                                var newLevelWidth = pRoom2->pRoom2Near[i]->pLevel->dwSizeX * 5;
-                                var newLevelHeight = pRoom2->pRoom2Near[i]->pLevel->dwSizeY * 5;
+                                var newLevelWidth = U32(pNearLevel, o.Level_dwSizeX) * 5;
+                                var newLevelHeight = U32(pNearLevel, o.Level_dwSizeY) * 5;
 
-                                var levelNumber = pRoom2->pRoom2Near[i]->pLevel->dwLevelNo;
                                 var adjacentLevel = new AdjacentLevel { LevelOrigin = origin, Width = (int)newLevelWidth, Height = (int)newLevelHeight };
-                                collisionMap.AdjacentLevels.TryAdd(levelNumber.ToString(), adjacentLevel);
+                                collisionMap.AdjacentLevels.TryAdd(nearLevelNo.ToString(), adjacentLevel);
                             }
                         }
 
                         // add collision data
-                        if (pRoom2->pRoom1 != null && pRoom2->pRoom1->Coll != null)
+                        Room1* pRoom1 = Ptr<Room1>(pRoom2, o.Room2_pRoom1);
+                        CollMap* pColl = pRoom1 != null ? Ptr<CollMap>(pRoom1, o.Room1_Coll) : null;
+                        if (pColl != null)
                         {
-                            var x = pRoom2->pRoom1->Coll->dwPosGameX - collisionMap.LevelOrigin.X;
-                            var y = pRoom2->pRoom1->Coll->dwPosGameY - collisionMap.LevelOrigin.Y;
-                            var cx = pRoom2->pRoom1->Coll->dwSizeGameX;
-                            var cy = pRoom2->pRoom1->Coll->dwSizeGameY;
+                            var x = U32(pColl, o.CollMap_dwPosGameX) - collisionMap.LevelOrigin.X;
+                            var y = U32(pColl, o.CollMap_dwPosGameY) - collisionMap.LevelOrigin.Y;
+                            var cx = U32(pColl, o.CollMap_dwSizeGameX);
+                            var cy = U32(pColl, o.CollMap_dwSizeGameY);
                             var nLimitX = x + cx;
                             var nLimitY = y + cy;
 
-                            var p = pRoom2->pRoom1->Coll->pMapStart;
+                            var p = U16Ptr(pColl, o.CollMap_pMapStart);
                             for (var j = y; j < nLimitY; j++)
                             {
                                 for (var i = x; i < nLimitX; i++)
@@ -100,44 +112,47 @@ namespace D2Map.Core.Helpers
                         }
 
                         // add unit data
-                        for (PresetUnit* pPresetUnit = pRoom2->pPreset; pPresetUnit != null; pPresetUnit = pPresetUnit->pPresetNext)
+                        for (PresetUnit* pPresetUnit = Ptr<PresetUnit>(pRoom2, o.Room2_pPreset); pPresetUnit != null; pPresetUnit = Ptr<PresetUnit>(pPresetUnit, o.PresetUnit_pPresetNext))
                         {
+                            uint type = U32(pPresetUnit, o.PresetUnit_dwType);
+                            uint txtFileNo = U32(pPresetUnit, o.PresetUnit_dwTxtFileNo);
+                            uint unitX = roomPosX * 5 + U32(pPresetUnit, o.PresetUnit_dwPosX);
+                            uint unitY = roomPosY * 5 + U32(pPresetUnit, o.PresetUnit_dwPosY);
+
                             // npcs
-                            if (pPresetUnit->dwType == unit_type_npc)
+                            if (type == unit_type_npc)
                             {
-                                var npcX = pRoom2->dwPosX * 5 + pPresetUnit->dwPosX;
-                                var npcY = pRoom2->dwPosY * 5 + pPresetUnit->dwPosY;
-                                var fileNumber = pPresetUnit->dwTxtFileNo.ToString();
-                                if (!collisionMap.Npcs.TryAdd(fileNumber, new List<Point> { new Point(npcX, npcY) }))
+                                var fileNumber = txtFileNo.ToString();
+                                if (!collisionMap.Npcs.TryAdd(fileNumber, new List<Point> { new Point(unitX, unitY) }))
                                 {
-                                    collisionMap.Npcs[fileNumber].Add(new Point(npcX, npcY));
+                                    collisionMap.Npcs[fileNumber].Add(new Point(unitX, unitY));
                                 }
                             }
 
                             // objects
-                            if (pPresetUnit->dwType == unit_type_object)
+                            if (type == unit_type_object)
                             {
-                                var objectX = pRoom2->dwPosX * 5 + pPresetUnit->dwPosX;
-                                var objectY = pRoom2->dwPosY * 5 + pPresetUnit->dwPosY;
-                                var fileNumber = pPresetUnit->dwTxtFileNo.ToString();
-                                if (!collisionMap.Objects.TryAdd(fileNumber, new List<Point> { new Point(objectX, objectY) }))
+                                var fileNumber = txtFileNo.ToString();
+                                if (!collisionMap.Objects.TryAdd(fileNumber, new List<Point> { new Point(unitX, unitY) }))
                                 {
-                                    collisionMap.Objects[fileNumber].Add(new Point(objectX, objectY));
+                                    collisionMap.Objects[fileNumber].Add(new Point(unitX, unitY));
                                 }
                             }
 
                             // level exits
-                            if (pPresetUnit->dwType == unit_type_tile)
+                            if (type == unit_type_tile)
                             {
-                                for (RoomTile* pRoomTile = pRoom2->pRoomTiles; pRoomTile != null; pRoomTile = pRoomTile->pNext)
+                                for (RoomTile* pRoomTile = Ptr<RoomTile>(pRoom2, o.Room2_pRoomTiles); pRoomTile != null; pRoomTile = Ptr<RoomTile>(pRoomTile, o.RoomTile_pNext))
                                 {
-                                    if (*pRoomTile->nNum == pPresetUnit->dwTxtFileNo)
+                                    uint* nNum = Ptr<uint>(pRoomTile, o.RoomTile_nNum);
+                                    if (nNum != null && *nNum == txtFileNo)
                                     {
-                                        var exitX = pRoom2->dwPosX * 5 + pPresetUnit->dwPosX;
-                                        var exitY = pRoom2->dwPosY * 5 + pPresetUnit->dwPosY;
-
-                                        var levelNumber = pRoomTile->pRoom2->pLevel->dwLevelNo.ToString();
-                                        collisionMap.AdjacentLevels[levelNumber].Exits.Add(new Point(exitX, exitY));
+                                        Room2* pTileRoom2 = Ptr<Room2>(pRoomTile, o.RoomTile_pRoom2);
+                                        var tileLevelNumber = U32(Ptr<Level>(pTileRoom2, o.Room2_pLevel), o.Level_dwLevelNo).ToString();
+                                        if (collisionMap.AdjacentLevels.TryGetValue(tileLevelNumber, out var adjacent))
+                                        {
+                                            adjacent.Exits.Add(new Point(unitX, unitY));
+                                        }
                                     }
                                 }
                             }
@@ -145,7 +160,7 @@ namespace D2Map.Core.Helpers
 
                         if (bAdded)
                         {
-                            MapDll.RemoveRoomData(act, pLevel->dwLevelNo, pRoom2->dwPosX, pRoom2->dwPosY, null);
+                            MapDll.RemoveRoomData(act, levelNo, roomPosX, roomPosY, null);
                         }
                     }
                 }

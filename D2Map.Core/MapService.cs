@@ -1,4 +1,5 @@
-﻿using D2Map.Core.Models;
+using D2Map.Core.Models;
+using D2Map.Core.Wrapper;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 
@@ -14,6 +15,13 @@ namespace D2Map.Core
         }
         public CollisionMap GetCollisionMap(uint mapId, Difficulty difficulty, Area area)
         {
+            // Before 1.10 (e.g. 1.09) the level layout is identical on every difficulty, so
+            // all difficulties share one session and one cache entry.
+            if (!D2Offsets.Current.MapDependsOnDifficulty)
+            {
+                difficulty = Difficulty.Normal;
+            }
+
             var session = _cache.GetOrCreate(Tuple.Create("map", mapId, difficulty), (cacheEntry) =>
             {
                 cacheEntry.RegisterPostEvictionCallback(DeleteSession);
