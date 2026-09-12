@@ -1,8 +1,9 @@
 version: 2.1
 
-# The native wrapper (D2Map.DllWrapper) is a Win32 C++ project, so the build needs Visual Studio's
-# MSBuild with the C++ toolset. That rules out the Linux .NET SDK image D2NG uses; the Windows
-# executor ships Visual Studio 2022 Build Tools, and the .NET 10 SDK is installed on the fly.
+# The native wrapper (D2Map.DllWrapper) is a Win32 C++ project and needs Visual Studio's MSBuild with
+# the C++ toolset, which rules out the Linux .NET SDK image D2NG uses. The Windows executor ships
+# Visual Studio 2022 Build Tools (MSBuild 17.14). Only the 10.0.1xx band of the .NET 10 SDK loads
+# under that MSBuild, later bands require MSBuild 18, so that band is installed explicitly.
 orbs:
   win: circleci/windows@5.0
 
@@ -14,10 +15,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install .NET 10 SDK
+          name: Install .NET 10 SDK (10.0.1xx band)
           command: |
             Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
-            ./dotnet-install.ps1 -Channel 10.0 -InstallDir "$env:USERPROFILE\dotnet"
+            ./dotnet-install.ps1 -Channel 10.0.1xx -InstallDir "$env:USERPROFILE\dotnet"
             & "$env:USERPROFILE\dotnet\dotnet.exe" --version
       - run:
           name: Build solution (Release, x86)
