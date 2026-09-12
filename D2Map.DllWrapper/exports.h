@@ -5,10 +5,15 @@
 #define API_EXPORT __declspec(dllexport)
 extern "C" {
 	API_EXPORT bool Initialize(const wchar_t* path);
+	// Detected game version after Initialize(): 113 (1.13c), 109 (1.09d) or 0 when unknown/not initialized.
+	API_EXPORT int32_t GetGameVersion();
+	// PE timestamp of the loaded D2Common.dll, for diagnostics when the version is not recognised.
+	API_EXPORT uint32_t GetD2CommonTimestamp();
 	API_EXPORT Level* GetLevel(ActMisc* misc, uint32_t levelno);
 	API_EXPORT void InitLevel(Level* pLevel);
 	API_EXPORT void AddRoomData(Act* pAct, int32_t levelid, int32_t xpos, int32_t ypos, Room1* pRoom);
 	API_EXPORT void RemoveRoomData(Act* pAct, int32_t levelid, int32_t xpos, int32_t ypos, Room1* pRoom);
+	// difficulty is ignored for versions where the map does not depend on it (1.09).
 	API_EXPORT Act* LoadAct(uint32_t actno, uint32_t seed, uint32_t difficulty, uint32_t TownLevelId);
 	API_EXPORT void UnloadAct(Act* pAct);
 }

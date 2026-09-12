@@ -1,59 +1,81 @@
 #pragma once
-#include "D2Structs.h"
 #include <Windows.h>
+#include <cstdint>
 
-#ifdef _DEFINE_VARS
+// Supported Diablo II versions. The numeric value is what GetGameVersion() returns to managed code.
+enum D2Version : int32_t {
+	D2_UNKNOWN = 0,
+	D2_109D = 109,
+	D2_113C = 113,
+};
 
-enum { DLLNO_D2CLIENT, DLLNO_D2COMMON, DLLNO_D2GFX, DLLNO_D2LANG, DLLNO_D2WIN, DLLNO_D2NET, DLLNO_D2GAME, DLLNO_D2LAUNCH, DLLNO_FOG, DLLNO_BNCLIENT, DLLNO_STORM, DLLNO_D2CMP, DLLNO_D2MULTI, DLLNO_D2SOUND };
+// Everything that differs between game versions on the native side.
+// Ordinals are export ordinals (resolved with GetProcAddress), rvas are offsets from the module base.
+struct D2VersionInfo {
+	D2Version version;
+	uint32_t d2commonTimestamp;     // PE FileHeader.TimeDateStamp of D2Common.dll, used for detection
 
-#define DLLOFFSET(a1,b1)         ((DLLNO_##a1)|((b1)<<8))
-#define FUNCPTR(d1,v1,t1,t2,o1)  typedef t1 d1##_##v1##_t t2; d1##_##v1##_t *d1##_##v1 = (d1##_##v1##_t *)DLLOFFSET(d1,o1);
-#define VARPTR(d1,v1,t1,o1)      typedef t1 d1##_##v1##_t;    d1##_##v1##_t *p_##d1##_##v1 = (d1##_##v1##_t *)DLLOFFSET(d1,o1);
-#define ASMPTR(d1,v1,o1)         uint32_t d1##_##v1 = DLLOFFSET(d1,o1);
+	// D2Common.dll ordinals
+	uint16_t ordLoadAct;
+	uint16_t ordUnloadAct;
+	uint16_t ordAddRoomData;
+	uint16_t ordRemoveRoomData;
+	uint16_t ordGetLevel;           // __fastcall (ActMisc*, levelNo): always allocates a new Level
+	uint16_t ordInitLevel;          // __stdcall (Level*)
+	uint16_t ordInitDataTables;     // __stdcall (0, 0, 0)
+	bool loadActHasDifficulty;      // 1.13c: 9 args incl. difficulty; 1.09d: 8 args, no difficulty
 
-#else
+	// Fog.dll ordinals (identical in every known version, kept here for completeness)
+	uint16_t ordFogSetAppName;      // 10021 (const char*)
+	uint16_t ordFogInitAsync;       // 10101 (1, 0)
+	uint16_t ordFogInitAsync2;      // 10089 (1)
+	uint16_t ordFogInit;            // 10218 ()
 
-#define FUNCPTR(d1, v1, t1, t2, o1)  typedef t1 d1##_##v1##_t t2; extern d1##_##v1##_t *d1##_##v1;
-#define VARPTR(d1, v1, t1, o1)       typedef t1 d1##_##v1##_t;    extern d1##_##v1##_t *p_##d1##_##v1;
-#define ASMPTR(d1, v1, o1)           extern uint32_t d1##_##v1;
+	// D2Win.dll ordinals
+	uint16_t ordD2WinLoadMpqs;      // 1.13c 10086 / 1.09d 10037: opens d2data/d2exp/patch mpqs
+	uint16_t ordD2WinInitArchives;  // 1.13c 10005 / 1.09d 10171: opens d2char/d2music/... and calls client callback
+	uint32_t clientStructCallbackOffset; // offset of the "init" callback pointer inside the struct passed to ordD2WinInitArchives
 
-#endif
+	// D2Lang.dll ordinal
+	uint16_t ordD2LangInit;         // 1.13c 10008 / 1.09d 10000: (0, "ENG", 0)
 
-FUNCPTR(D2CLIENT, InitGameMisc_I, void __stdcall, (uint32_t Dummy1, uint32_t Dummy2, uint32_t Dummy3), 0x4454B) // Updated
-VARPTR(STORM, MPQHashTable, uint32_t, 0x53120) // Updated
-ASMPTR(D2CLIENT, LoadAct_1, 0x62AA0) // Updated
-ASMPTR(D2CLIENT, LoadAct_2, 0x62760) // Updated
-FUNCPTR(D2COMMON,
-    AddRoomData,
-    void __stdcall,
-    (Act* ptAct, int LevelId, int Xpos, int Ypos, Room1* pRoom),
-    -10401)//Updated  // 1.12 -10184
-    FUNCPTR(D2COMMON,
-        RemoveRoomData,
-        void __stdcall,
-        (Act* ptAct, int LevelId, int Xpos, int Ypos, Room1* pRoom),
-        -11099)//Updated // 1.12 -11009
-    FUNCPTR(D2COMMON, GetLevel, Level* __fastcall, (ActMisc* pMisc, uint32_t dwLevelNo), -10207)//Updated // 1.12 -11020
+	// Storm.dll: pointer to the lazily allocated MPQ crypt table, reset to 0 before init
+	uint32_t rvaStormMpqHashTable;
 
-    FUNCPTR(D2COMMON, InitLevel, void __stdcall, (Level* pLevel), -10322)//Updated // 1.12 -10721
-    FUNCPTR(D2COMMON,
-        LoadAct,
-        Act* __stdcall,
-        (uint32_t ActNumber, uint32_t Seed, uint32_t Unk, void* pGame, uint32_t Difficulty, void* pMempool, uint32_t TownLevelId, uint32_t Func_1, uint32_t Func_2),
-        -10951)//Updated 1.13 0x3CB30 // 1.12  0x56780
-    FUNCPTR(D2COMMON, UnloadAct, void __stdcall, (Act* pAct), -10868) //Updated // 1.12 -10710
+	// D2Client.dll (only needed for 1.13c, 0 when unused)
+	uint32_t rvaClientInitGameMisc;
+	uint32_t rvaClientLoadActCallback1;
+	uint32_t rvaClientLoadActCallback2;
 
-    FUNCPTR(FOG, 10021, void __fastcall, (const char* szProg), -10021) // 1.12 & 1.13
-    FUNCPTR(FOG, 10101, uint32_t __fastcall, (uint32_t _1, uint32_t _2), -10101) // 1.12 & 1.13
-    FUNCPTR(FOG, 10089, uint32_t __fastcall, (uint32_t _1), -10089) // 1.12 & 1.13
-    FUNCPTR(FOG, 10218, uint32_t __fastcall, (void), -10218) // 1.12 & 1.13
+	// Struct offsets needed natively (GetLevel walks the level list before allocating)
+	uint32_t offMiscLevelFirst;     // ActMisc -> Level* first
+	uint32_t offLevelNext;          // Level -> Level* next
+	uint32_t offLevelNo;            // Level -> DWORD levelNo
+};
 
-    FUNCPTR(D2WIN, 10086, uint32_t __fastcall, (void), -10086) // Updated
-    FUNCPTR(D2WIN, 10005, uint32_t __fastcall, (uint32_t _1, uint32_t _2, uint32_t _3, d2client_struct* pD2Client), -10005) //Updated
+// Diablo II 1.13c (D2Common.dll timestamp 0x4B95C439)
+static const D2VersionInfo D2_INFO_113C = {
+	D2_113C, 0x4B95C439,
+	10951, 10868, 10401, 11099, 10207, 10322, 10943, true,
+	10021, 10101, 10089, 10218,
+	10086, 10005, 0x20D,
+	10008,
+	0x53120,
+	0x4454B, 0x62AA0, 0x62760,
+	0x47C, 0x1AC, 0x1D0,
+};
 
-    FUNCPTR(D2LANG, 10008, uint32_t __fastcall, (uint32_t _1, const char* _2, uint32_t _3), -10008) //Updated
-    FUNCPTR(D2COMMON, InitDataTables, uint32_t __stdcall, (uint32_t _1, uint32_t _2, uint32_t _3), -10943)//Updated //1.12 -10797
+// Diablo II 1.09d (D2Common.dll timestamp 0x3C06FDCC)
+// Reverse engineered from the 1.09d binaries: see README section "1.09 support".
+static const D2VersionInfo D2_INFO_109D = {
+	D2_109D, 0x3C06FDCC,
+	10038, 10039, 10063, 10064, 10013, 10006, 10576, false,
+	10021, 10101, 10089, 10218,
+	10037, 10171, 0x20C,
+	10000,
+	0x3A684,
+	0, 0, 0,
+	0x0, 0x22C, 0x4,
+};
 
-#undef FUNCPTR
-#undef VARPTR
-#undef ASMPTR
+static const D2VersionInfo* const D2_KNOWN_VERSIONS[] = { &D2_INFO_113C, &D2_INFO_109D };

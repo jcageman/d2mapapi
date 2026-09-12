@@ -1,9 +1,12 @@
 # d2mapapi
 Diablo II map rest API to retrieve the map layout per area given a map id.
 
-A diablo 2 1.13C installation is required, but the result returned by this API should work for all versions of diablo 2, since the map generation has stayed the same across all verisons.
+A Diablo II **1.13c** or **1.09d** installation is required. The version is detected automatically from the
+installation's `D2Common.dll`, and the same API works for both. The level layout (collision map, level bounds,
+exits) is identical between versions for the same map seed; see [1.09 support](#109-support) for what differs.
 
-Note: for 1.09 and lower, higher difficulties do not generate larger maps, hence when interfacing with the API, always use difficulty normal.
+Note: for 1.09 and lower, higher difficulties do not generate larger maps. When a 1.09 installation is used the
+`difficulty` parameter is ignored and every difficulty returns the Normal map.
 
 ## Installation
 
@@ -49,3 +52,28 @@ GET https://localhost:5001/maps?mapid=1053646565&area=2&difficulty=0
 
 [List Of Areas](/D2Map.Core/Models/Area.cs)
 
+
+## 1.09 support
+
+The native wrapper (`D2Map.DllWrapper`) detects the game version from the PE timestamp of `D2Common.dll`
+(`0x4B95C439` = 1.13c, `0x3C06FDCC` = 1.09d) and picks the matching export ordinals and structure offsets.
+The 1.09d values were reverse engineered from the 1.09d binaries and live in two places:
+
+- `D2Map.DllWrapper/d2ptrs.h`: export ordinals (D2Common, D2Win, D2Lang, Fog), the Storm MPQ hash table
+  variable and the few offsets the native side needs.
+- `D2Map.Core/Wrapper/D2Offsets.cs`: structure offsets (Act, ActMisc, Level, Room1, Room2, CollMap,
+  PresetUnit, RoomTile) used to walk the generated level.
+
+Notable differences in 1.09d:
+
+- `LoadAct` has no difficulty parameter (8 arguments instead of 9), so all difficulties share one map.
+- The D2Client callbacks are not needed; they are optional in D2Common and only feed the in-game automap.
+- NPC ids in the `npcs` result follow the 1.09 `monstats.txt` numbering, which differs from 1.13c for the
+  preset spawn placeholders (e.g. 1.13c ids 734-793 are 612-671 in 1.09, 802-836 are 577-611).
+  Level bounds, collision data, exits and object ids are the same as 1.13c for the same seed.
+
+Usage is unchanged, just point `Diablo2Directory` at the 1.09d installation:
+
+```
+./D2Map.Api.exe Diablo2Directory="C:\Diablo II 1.09"
+```
